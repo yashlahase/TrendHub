@@ -1,0 +1,42 @@
+name: TrendHub CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-size: 18
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+      - name: Build Docker Backend Image
+        run: docker build ./backend -t trendhub-backend
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-size: 18
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+      - name: Build Frontend Assets
+        run: |
+          cd frontend
+          npm run build
+      - name: Build Docker Frontend Image
+        run: docker build ./frontend -t trendhub-frontend
