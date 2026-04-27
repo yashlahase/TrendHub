@@ -10,24 +10,27 @@ const OrderHistory = () => {
   const [error, setError] = useState(null);
   const { userInfo } = useContext(ShopContext);
 
+  const fetchOrders = React.useCallback(async () => {
+    try {
+      const { data } = await api.get('/orders/myorders');
+      setOrders(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message);
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const { data } = await api.get('/orders/myorders');
-        setOrders(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.response?.data?.message || err.message);
+    const init = async () => {
+      if (userInfo) {
+        await fetchOrders();
+      } else {
         setLoading(false);
       }
     };
-
-    if (userInfo) {
-      fetchOrders();
-    } else {
-      setLoading(false);
-    }
-  }, [userInfo]);
+    init();
+  }, [userInfo, fetchOrders]);
 
   const cancelHandler = async (id) => {
     if (window.confirm('Are you sure you want to cancel this order?')) {

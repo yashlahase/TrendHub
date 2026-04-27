@@ -22,11 +22,14 @@ const AdminProducts = () => {
   };
 
   useEffect(() => {
-    if (userInfo && userInfo.role === 'admin') {
-      fetchProducts();
-    } else {
-      setLoading(false);
-    }
+    const init = async () => {
+      if (userInfo && userInfo.role === 'admin') {
+        await fetchProducts();
+      } else {
+        setLoading(false);
+      }
+    };
+    init();
   }, [userInfo]);
 
   const deleteHandler = async (id) => {

@@ -22,11 +22,14 @@ const AdminOrders = () => {
   };
 
   useEffect(() => {
-    if (userInfo && userInfo.role === 'admin') {
-      fetchOrders();
-    } else {
-      setLoading(false);
-    }
+    const init = async () => {
+      if (userInfo && userInfo.role === 'admin') {
+        await fetchOrders();
+      } else {
+        setLoading(false);
+      }
+    };
+    init();
   }, [userInfo]);
 
   const deliverHandler = async (id) => {
