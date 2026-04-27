@@ -140,6 +140,33 @@ const updateOrderToDelivered = async (req, res, next) => {
   }
 };
 
+// @desc    Cancel order
+// @route   PUT /api/orders/:id/cancel
+// @access  Private
+const cancelOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (order) {
+      if (order.isDelivered) {
+        res.status(400);
+        throw new Error('Cannot cancel a delivered order');
+      }
+
+      order.isCancelled = true;
+      order.cancelledAt = Date.now();
+
+      const updatedOrder = await order.save();
+      res.json(updatedOrder);
+    } else {
+      res.status(404);
+      throw new Error('Order not found');
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   addOrderItems,
   getOrderById,
@@ -147,4 +174,5 @@ module.exports = {
   getMyOrders,
   getOrders,
   updateOrderToDelivered,
+  cancelOrder,
 };
