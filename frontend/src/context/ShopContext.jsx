@@ -8,6 +8,9 @@ const ShopProvider = ({ children }) => {
   const [cart, setCart] = useState(
     localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
   );
+  const [wishlist, setWishlist] = useState(
+    localStorage.getItem('wishlist') ? JSON.parse(localStorage.getItem('wishlist')) : []
+  );
   const [userInfo, setUserInfo] = useState(
     localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null
   );
@@ -35,6 +38,11 @@ const ShopProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Update localStorage when wishlist changes
+  useEffect(() => {
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
+
   // Update localStorage when userInfo changes
   useEffect(() => {
     if (userInfo) {
@@ -61,6 +69,15 @@ const ShopProvider = ({ children }) => {
     setCart(cart.filter((x) => x._id !== id));
   };
 
+  const toggleWishlist = (product) => {
+    const itemExists = wishlist.find((x) => x._id === product._id);
+    if (itemExists) {
+      setWishlist(wishlist.filter((x) => x._id !== product._id));
+    } else {
+      setWishlist([...wishlist, product]);
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const { data } = await api.post('/users/login', { email, password });
@@ -81,6 +98,11 @@ const ShopProvider = ({ children }) => {
     }
   };
 
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+  };
+
   const logout = () => {
     setUserInfo(null);
   };
@@ -90,11 +112,14 @@ const ShopProvider = ({ children }) => {
       value={{
         products,
         cart,
+        wishlist,
         userInfo,
         loading,
         error,
         addToCart,
         removeFromCart,
+        clearCart,
+        toggleWishlist,
         login,
         register,
         logout,
