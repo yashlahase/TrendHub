@@ -102,6 +102,6 @@ jobs:
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def-frontend.outputs.task-definition }}
-          service: trendhub-service
-          cluster: trendhub-cluster
+          service: trendhub-task-service-ogus6p4o
+          cluster: trendhub
           wait-for-service-stability: true
