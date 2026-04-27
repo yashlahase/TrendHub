@@ -1,14 +1,16 @@
 import React, { useContext } from 'react';
 import { ShoppingCart, Trash2, ArrowLeft, ArrowRight, Minus, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 
 const Cart = () => {
   const { cart, addToCart, removeFromCart } = useContext(ShopContext);
+  const navigate = useNavigate();
 
   const updateQty = (id, newQty) => {
+    if (newQty < 1) return;
     const item = cart.find(x => x._id === id);
-    if (item) {
+    if (item && newQty <= item.countInStock) {
       addToCart(item, newQty);
     }
   };
@@ -98,7 +100,7 @@ const Cart = () => {
                     <span className="text-2xl font-bold tracking-tight text-accent">₹{subtotal}</span>
                   </div>
                 </div>
-                <button className="btn-primary w-full group flex items-center justify-center">
+                <button onClick={() => navigate('/checkout')} className="btn-primary w-full group flex items-center justify-center">
                   Proceed to Checkout <ArrowRight size={18} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </button>
                 <div className="mt-8 space-y-4">
