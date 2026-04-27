@@ -26,10 +26,10 @@ const Hero = () => {
             Discover the latest trends from world-class designers. Elevate your wardrobe with pieces that are both timeless and modern.
           </p>
           <div className="flex flex-col sm:flex-row gap-6">
-            <button className="btn-primary hover:scale-105 transition-transform duration-300">
+            <button onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })} className="btn-primary hover:scale-105 transition-transform duration-300">
               Shop Collection
             </button>
-            <button className="btn-outline border-white text-white hover:bg-white hover:text-primary hover:scale-105 transition-transform duration-300">
+            <button onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })} className="btn-outline border-white text-white hover:bg-white hover:text-primary hover:scale-105 transition-transform duration-300">
               Latest Trends
             </button>
           </div>
