@@ -1,14 +1,31 @@
 import React, { useState, useContext } from 'react';
 import { ShoppingCart, Star, Truck, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
+import api from '../services/api';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
-  const { products, addToCart } = useContext(ShopContext);
+  const [selectedSize, setSelectedSize] = useState('M');
+  const [rating, setRating] = useState('');
+  const [comment, setComment] = useState('');
+  const { products, addToCart, userInfo } = useContext(ShopContext);
 
   const product = products.find((p) => p._id === id);
+
+  const submitReviewHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post(`/products/${id}/reviews`, { rating, comment });
+      alert('Review submitted successfully! Please refresh to see it.');
+      setRating('');
+      setComment('');
+    } catch (err) {
+      alert(err.response?.data?.message || err.message);
+    }
+  };
 
   if (!product) return <div className="pt-40 text-center">Product not found.</div>;
 
@@ -59,7 +76,11 @@ const ProductDetails = () => {
                 <label className="text-xs font-bold uppercase tracking-widest block mb-4">Select Size</label>
                 <div className="flex space-x-3">
                   {['S', 'M', 'L', 'XL'].map((size) => (
-                    <button key={size} className="w-12 h-12 border-2 border-secondary flex items-center justify-center text-sm font-bold hover:border-accent transition-colors">
+                    <button 
+                      key={size} 
+                      onClick={() => setSelectedSize(size)}
+                      className={`w-12 h-12 border-2 flex items-center justify-center text-sm font-bold transition-colors ${selectedSize === size ? 'border-primary bg-primary text-white' : 'border-secondary hover:border-accent'}`}
+                    >
                       {size}
                     </button>
                   ))}
@@ -88,7 +109,10 @@ const ProductDetails = () => {
             </div>
 
             <button 
-              onClick={() => addToCart(product, qty)}
+              onClick={() => {
+                addToCart(product, qty);
+                navigate('/cart');
+              }}
               className="btn-primary w-full md:w-auto mt-4 px-12 group"
             >
               <ShoppingCart size={18} className="inline-block mr-2 group-hover:scale-110 transition-transform" /> Add to Cart
@@ -110,6 +134,84 @@ const ProductDetails = () => {
                   <p className="text-xs text-gray-400">100% Secure payment processing</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-24 border-t border-secondary pt-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+            {/* Reviews List */}
+            <div className="lg:col-span-2">
+              <h3 className="text-2xl font-serif mb-8">Customer <span className="italic text-accent underline">Reviews</span></h3>
+              {product.reviews && product.reviews.length === 0 ? (
+                <div className="bg-secondary p-8 text-center text-gray-500">No reviews yet. Be the first to review this product.</div>
+              ) : (
+                <div className="space-y-8">
+                  {product.reviews && product.reviews.map((review) => (
+                    <div key={review._id} className="border-b border-secondary pb-8">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="font-bold text-sm uppercase tracking-widest">{review.name}</span>
+                        <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex text-accent mb-4">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            size={14} 
+                            className={i < review.rating ? "fill-accent" : "fill-none"} 
+                          />
+                        ))}
+                      </div>
+                      <p className="text-gray-500 text-sm leading-relaxed">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Review Form */}
+            <div>
+              <h3 className="text-2xl font-serif mb-8">Write a <span className="italic text-accent underline">Review</span></h3>
+              {userInfo ? (
+                <div className="bg-secondary p-8 border-2 border-primary">
+                  <form onSubmit={submitReviewHandler} className="space-y-6">
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-widest mb-2 block text-gray-500">Rating</label>
+                      <select 
+                        value={rating} 
+                        onChange={(e) => setRating(e.target.value)}
+                        className="w-full p-3 bg-white border-2 border-secondary focus:border-accent outline-none"
+                        required
+                      >
+                        <option value="">Select...</option>
+                        <option value="1">1 - Poor</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="3">3 - Good</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="5">5 - Excellent</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-bold uppercase tracking-widest mb-2 block text-gray-500">Comment</label>
+                      <textarea 
+                        rows="4" 
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        className="w-full p-3 bg-white border-2 border-secondary focus:border-accent outline-none" 
+                        placeholder="Share your thoughts..."
+                        required
+                      ></textarea>
+                    </div>
+                    <button type="submit" className="btn-primary w-full">Submit Review</button>
+                  </form>
+                </div>
+              ) : (
+                <div className="bg-secondary p-8 text-center border-2 border-primary">
+                  <p className="mb-4">Please log in to write a review.</p>
+                  <Link to="/login" className="btn-primary inline-block">Log In</Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
